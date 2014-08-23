@@ -116,7 +116,7 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin {
 
         // check if there's a usable cache
         $text   = false;
-        $cache  = getCacheName($raw, 'ghplugin');
+        $cache  = getCacheName($raw, '.ghplugin');
         $tcache = @filemtime($cache);
         $tpage  = @filemtime(wikiFN($ID));
         if($tcache && $tpage && !$INPUT->bool('purge')) {
