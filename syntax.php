@@ -108,11 +108,40 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin {
         if(!$data['blob']) return false;
         if(!$data['file']) return false;
 
+        global $ID;
+        global $INPUT;
+
         $raw = 'https://raw.githubusercontent.com/'.$data['user'].'/'.$data['repo'].'/'.$data['blob'].'/'.$data['file'];
         $url = 'https://github.com/'.$data['user'].'/'.$data['repo'].'/blob/'.$data['blob'].'/'.$data['file'];
 
-        $http = new DokuHTTPClient();
-        $text = $http->get($raw);
+        // check if there's a usable cache
+        $text   = false;
+        $cache  = getCacheName($raw, 'ghplugin');
+        $tcache = @filemtime($cache);
+        $tpage  = @filemtime(wikiFN($ID));
+        if($tcache && $tpage && !$INPUT->bool('purge')) {
+            $now = time();
+            if($now - $tcache < ($now - $tpage) * 2) {
+                // use cache when it's younger than twice the age of the page
+                $text = io_readFile($cache);
+            }
+        }
+
+        // no cache loaded, get from HTTP
+        if(!$text) {
+            $http = new DokuHTTPClient();
+            $text = $http->get($raw);
+
+            if($text) {
+                // save to cache
+                io_saveFile($cache, $text);
+            } else if($tcache) {
+                // HTTP failed but there's an old cache - use it
+                $text = io_readFile($cache);
+            }
+        }
+
+        // WTF? there's nothing. we're done here
         if(!$text) return true;
 
         // apply line ranges
@@ -136,7 +165,7 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin {
         $renderer->doc .= hsc($data['file']);
         $renderer->doc .= '</a></dt>'.DOKU_LF.'<dd>';
 
-        if(isset($this->ext2lang[$ext])){
+        if(isset($this->ext2lang[$ext])) {
             $lang = $this->ext2lang[$ext];
         } else {
             $lang = $ext;
