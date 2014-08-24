@@ -172,7 +172,7 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin {
         }
 
         $renderer->file($text, $lang);
-
+        $renderer->doc .= '</dd>';
         return true;
     }
 }
