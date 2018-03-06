@@ -1,7 +1,7 @@
 base   gh
 author Andreas Gohr
 email  andi@splitbrain.org
-date   2017-10-07
+date   2018-03-06
 name   gh plugin
 desc   andi@splitbrain.org
 url    http://www.dokuwiki.org/plugin:gh
