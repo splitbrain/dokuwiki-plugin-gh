@@ -30,7 +30,7 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin
         'py' => 'python',
         'rb' => 'ruby',
         'sh' => 'bash',
-        'yml'  => 'yaml',
+        'yml' => 'yaml',
     );
 
     /**
@@ -80,11 +80,11 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin
             'to' => (int)$to
         );
 
-        if (preg_match('/github\.com\/([\w-]+)\/([\w-]+)\/blob\/([\w-]+)\/(.*)$/', $url, $m)) {
-            $data['user'] = $m[1];
+        if (preg_match('/([\w.\-]+)\/([\w-]+\/[\w-]+(\/[\w-]+)?)\/blob\/([\w-]+)\/(.*)$/', $url, $m)) {
+            $data['base'] = $m[1];
             $data['repo'] = $m[2];
-            $data['blob'] = $m[3];
-            $data['file'] = $m[4];
+            $data['blob'] = $m[4];
+            $data['file'] = $m[5];
         }
 
         return $data;
@@ -95,7 +95,7 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin
     {
         if ($mode != 'xhtml') return false;
 
-        if (!$data['user']) return false;
+        if (!$data['base']) return false;
         if (!$data['repo']) return false;
         if (!$data['blob']) return false;
         if (!$data['file']) return false;
@@ -103,8 +103,12 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin
         global $ID;
         global $INPUT;
 
-        $raw = 'https://raw.githubusercontent.com/' . $data['user'] . '/' . $data['repo'] . '/' . $data['blob'] . '/' . $data['file'];
-        $url = 'https://github.com/' . $data['user'] . '/' . $data['repo'] . '/blob/' . $data['blob'] . '/' . $data['file'];
+        if ($data['base'] == 'github.com') {
+            $raw = 'https://raw.githubusercontent.com/' . $data['repo'] . '/' . $data['blob'] . '/' . $data['file'];
+        } else {
+            $raw = 'https://' . $data['base'] . '/' . $data['repo'] . '/raw/' . $data['blob'] . '/' . $data['file'];
+        }
+        $url = 'https://' . $data['base'] . '/' . $data['repo'] . '/blob/' . $data['blob'] . '/' . $data['file'];
 
         // check if there's a usable cache
         $text = false;
