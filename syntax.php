@@ -18,16 +18,19 @@ class syntax_plugin_gh extends DokuWiki_Syntax_Plugin
      */
     protected $ext2lang = array(
         'as' => 'actionscript3',
-        'sh' => 'bash',
         'bas' => 'gwbasic',
+        'h' => 'c',
+        'hpp' => 'cpp',
         'hs' => 'haskell',
         'htm' => 'html5',
         'html' => 'html5',
         'js' => 'javascript',
         'pas' => 'pascal',
         'pl' => 'perl6',
-        'rb' => 'ruby',
         'py' => 'python',
+        'rb' => 'ruby',
+        'sh' => 'bash',
+        'yml'  => 'yaml',
     );
 
     /**
