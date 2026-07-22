@@ -107,6 +107,12 @@ class syntax_plugin_gh extends SyntaxPlugin
             $raw = 'https://' . $data['base'] . '/' . $data['repo'] . '/raw/' . $data['blob'] . '/' . $data['file'];
         }
         $url = 'https://' . $data['base'] . '/' . $data['repo'] . '/blob/' . $data['blob'] . '/' . $data['file'];
+        if (is_int($data['from']) && is_int($data['to'])) {
+            if ($data['from'] == $data['to'])
+                $url .= '#L' . $data['from'];
+            else
+                $url .= '#L' . $data['from'] . '-L'.$data['to'];
+        }
 
         // check if there's a usable cache
         $text = false;
@@ -140,11 +146,12 @@ class syntax_plugin_gh extends SyntaxPlugin
 
         // apply line ranges
         if ($data['from'] || $data['to']) {
+            $adjustedFrom = max($data['from'] - 1, 0);
             $len = $data['to'] - $data['from'];
             if ($len <= 0) $len = null;
 
             $lines = explode("\n", $text);
-            $lines = array_slice($lines, $data['from'], $len);
+            $lines = array_slice($lines, $adjustedFrom, $len);
             $text = implode("\n", $lines);
         }
 
@@ -157,7 +164,18 @@ class syntax_plugin_gh extends SyntaxPlugin
         $renderer->doc .= '<dl class="file">' . DOKU_LF;
         $renderer->doc .= '<dt><a href="' . $url . '" class="' . $class . '">';
         $renderer->doc .= hsc($data['file']);
-        $renderer->doc .= '</a></dt>' . DOKU_LF . '<dd>';
+        $renderer->doc .= '</a>';
+        if ($data['from'] || $data['to']) {
+            $renderer->doc .= '<span class="gh_lines">';
+            if ($data['from'] == $data['to']) {
+                $renderer->doc .= $this->getLang('line') . ' ' . hsc($data['from']);
+            } else {
+                $renderer->doc .= $this->getLang('lines') . ' ' . hsc($data['from'])
+                    . ' ' . $this->getLang('linesto') . ' ' . hsc($data['to']);
+            }
+            $renderer->doc .= '</span>';
+        }
+        $renderer->doc .= '</dt>' . DOKU_LF . '<dd>';
 
         if (isset($this->ext2lang[$ext])) {
             $lang = $this->ext2lang[$ext];
